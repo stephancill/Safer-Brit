@@ -269,6 +269,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Parklands-Web";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -282,6 +283,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Parklands-Web";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
@@ -304,6 +306,7 @@
 				D4E5FF271ECB4D9D0089F2E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
