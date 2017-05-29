@@ -47,12 +47,19 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		let bar = (self.navigationController?.navigationBar)!
 		
 		searchBar = UIView(frame: CGRect.init(x: 0, y: 0, width: 500, height: 30))
+		if self.view.frame.width < 600 {
+			searchBar.setWidth(self.view.frame.width * 40/100)
+		}
 		searchBar.frame.origin = CGPoint(x: bar.frame.width / 2 - searchBar.frame.width / 2, y: bar.frame.height / 2 - searchBar.frame.height / 2)
 		searchBar.backgroundColor = .white
 		searchBar.layer.cornerRadius = 7
 		searchBar.layer.opacity = 0.75
 		searchBar.layer.borderWidth = 1
 		searchBar.layer.borderColor = UIColor.gray.cgColor
+		
+		if self.view.frame.width < 600 {
+			searchBar.setWidth(self.view.frame.width * 60/100)
+		}
 		
 		searchField = UITextField(frame: CGRect.init(x: 0, y: 0, width: searchBar.frame.width * 95/100, height: 30))
 		searchField.backgroundColor = .clear
@@ -87,6 +94,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		progressBarView.backgroundColor = .blue
 		progressBarView.setWidth(0)
 		
+		bar.backgroundColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
+		bar.layer.opacity = 1
 		bar.addSubviews([searchBar, homeButton, reloadButton, progressBarView])
 	}
 	
@@ -161,6 +170,15 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		print("finished")
 		completeProgressBar()
+//		var html = ""
+//		webView.evaluateJavaScript("document.documentElement.outerHTML.toString()",
+//		                           completionHandler: { (html: Any?, error: Error?) in
+//									
+//									for line in (html as! String).components(separatedBy: "</") {
+//										
+//									}
+//		})
+////		webView.loadHTMLString(html, baseURL: webView.url)
 	}
 	
 	func textFieldDidBeginEditing(_ textField: UITextField) {

@@ -96,7 +96,7 @@
 				TargetAttributes = {
 					D4E5FF121ECB4D9D0089F2E5 = {
 						CreatedOnToolsVersion = 8.3.1;
-						DevelopmentTeam = 6JKMV57Y77;
+						DevelopmentTeam = RX8VB86N8V;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -263,10 +263,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 6JKMV57Y77;
+				DEVELOPMENT_TEAM = RX8VB86N8V;
 				INFOPLIST_FILE = "Parklands Web/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Parklands-Web";
+				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Simple-Web";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -277,10 +277,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 6JKMV57Y77;
+				DEVELOPMENT_TEAM = RX8VB86N8V;
 				INFOPLIST_FILE = "Parklands Web/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Parklands-Web";
+				PRODUCT_BUNDLE_IDENTIFIER = "parklands.co.za.Simple-Web";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = 2;
