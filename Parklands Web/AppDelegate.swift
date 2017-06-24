@@ -17,9 +17,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 		// Override point for customization after application launch.
 		
+//		// Set 'firstLaunch' to true on first launch, false for consecutive launches
+//		if (UserDefaults.standard.object(forKey: "firstLaunch") == nil){
+//			UserDefaults.standard.set(true, forKey: "firstLaunch")
+//		} else {
+//			UserDefaults.standard.set(false, forKey: "firstLaunch")
+//		}
+
+		
+		let viewController: ViewController = ViewController()
+		let navigationController = UINavigationController(rootViewController: viewController)
+		
 		window = UIWindow()
 		window?.makeKeyAndVisible()
-		window?.rootViewController = UINavigationController(rootViewController: ViewController())
+		window?.rootViewController = navigationController
+		
+		navigationController.navigationBar.barStyle = .default
+		navigationController.navigationBar.tintColor = .red
+		navigationController.navigationBar.backgroundColor = .red
+		
+		
 		
 		return true
 	}
