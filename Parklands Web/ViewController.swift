@@ -86,12 +86,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		let sourcePostLoad = getEditorScriptSource()
 		let scriptPostLoad = WKUserScript(source: sourcePostLoad, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
 		
-		let sourcePreLoad = getAdblockSource()
-		let scriptPreLoad = WKUserScript(source: sourcePreLoad, injectionTime: .atDocumentStart, forMainFrameOnly: true)
-		
 		let contentController = WKUserContentController()
 		contentController.addUserScript(scriptPostLoad)
-		contentController.addUserScript(scriptPreLoad)
 		let configuration = WKWebViewConfiguration()
 		configuration.userContentController = contentController
 		return configuration
@@ -105,20 +101,6 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		source += "var hosts = \(blockedHosts)\n"
 		do {
 			if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
-				source += try String.init(contentsOf: URL(fileURLWithPath: path))
-				print(source)
-			}
-		} catch {
-			print("Could not load words")
-		}
-		
-		return source
-	}
-	func getAdblockSource() -> String {
-		var source = ""
-
-		do {
-			if let path = Bundle.main.path(forResource: "ad-remover", ofType:"js") {
 				source += try String.init(contentsOf: URL(fileURLWithPath: path))
 				print(source)
 			}
