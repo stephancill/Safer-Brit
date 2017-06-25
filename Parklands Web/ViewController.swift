@@ -172,13 +172,14 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		searchBar.addSubview(searchField)
 		
 		backButton = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(goBack))
+		backButton.tintColor = darkOrange
 		backButton.isEnabled = false
 		self.navigationItem.setLeftBarButton(backButton, animated: true)
 		
 		forwardButton = UIBarButtonItem(title: "Forward", style: .plain, target: self, action: #selector(goForward))
+		forwardButton.tintColor = darkOrange
 		forwardButton.isEnabled = false
 		self.navigationItem.setRightBarButton(forwardButton, animated: true)
-		
 		
 		homeButton = UIButton(frame: CGRect.init(x: 0, y: 0, width: searchBar.frame.height * 96/100, height: searchBar.frame.height * 96/100))
 		homeButton.frame.origin = CGPoint(x: searchBar.frame.minX - homeButton.frame.width - 12, y: searchBar.frame.height / 2 - homeButton.frame.height / 2 + 7)
@@ -197,15 +198,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		bar.barStyle = .default
 		bar.tintColor = darkOrange
 		bar.backgroundColor = darkOrange
-		
-//		bar.layer.shadowOffset = CGSize(width: 0, height: 1)
-//		bar.layer.shadowRadius = 2.0
-//		bar.layer.shadowColor = UIColor.gray.cgColor
-//		bar.layer.shadowOpacity = 0.3
 
-		//		bar.backgroundColor =
-		//		bar.tintColor =
-		//		bar.layer.opacity = 1
 		bar.addSubviews([searchBar, homeButton, reloadButton, progressBarView])
 	}
 	
