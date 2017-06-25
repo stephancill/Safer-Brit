@@ -21,11 +21,14 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	var homeButton: UIButton!
 	var reloadButton: UIButton!
 	
+	var darkOrange: UIColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
+	
 	var progressBarView: UIView!
 	
 	var pageEditorSource: String!
 	
 	override func loadView() {
+		super.loadView()
 		webView = WKWebView(frame: .zero, configuration: createWebViewConfiguration())
 		webView.uiDelegate = self
 		webView.navigationDelegate = self
@@ -94,8 +97,8 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	}
 	
 	func getEditorScriptSource() -> String {
-		let blockedWords: [String] = ["flippen", "heck", "dangit", "dating"]
-		let blockedHosts: [String] = ["google", "bing", "yahoo"]
+		let blockedWords: [String] = ["flippen", "dangit", "dating"]
+		let blockedHosts: [String] = ["google", "bing", "yahoo", "msn"]
 		var source = ""
 		source += "var words = \(blockedWords)\n"
 		source += "var hosts = \(blockedHosts)\n"
@@ -115,7 +118,6 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	
 	func textFieldDidBeginEditing(_ textField: UITextField) {
 		textField.selectAll(self)
-		
 	}
 	
 	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -138,8 +140,6 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		self.setupNavigationBar()
 	}
 	
-	
-	
 	func setupNavigationBar() {
 		let bar = (self.navigationController?.navigationBar)!
 		
@@ -151,8 +151,11 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		searchBar.backgroundColor = .white
 		searchBar.layer.cornerRadius = 7
 		searchBar.layer.opacity = 0.75
-		searchBar.layer.borderWidth = 1
-		searchBar.layer.borderColor = UIColor.gray.cgColor
+		searchBar.layer.borderColor = darkOrange.cgColor
+		searchBar.layer.shadowOffset = CGSize(width: 1, height: 1)
+		searchBar.layer.shadowRadius = 2
+		searchBar.layer.shadowColor = UIColor.gray.cgColor
+		searchBar.layer.shadowOpacity = 0.3
 		
 		if self.view.frame.width < 600 {
 			searchBar.setWidth(self.view.frame.width * 60/100)
@@ -191,8 +194,17 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		progressBarView.backgroundColor = .blue
 		progressBarView.setWidth(0)
 		
-		//		bar.backgroundColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
-		//		bar.tintColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
+		bar.barStyle = .default
+		bar.tintColor = darkOrange
+		bar.backgroundColor = darkOrange
+		
+//		bar.layer.shadowOffset = CGSize(width: 0, height: 1)
+//		bar.layer.shadowRadius = 2.0
+//		bar.layer.shadowColor = UIColor.gray.cgColor
+//		bar.layer.shadowOpacity = 0.3
+
+		//		bar.backgroundColor =
+		//		bar.tintColor =
 		//		bar.layer.opacity = 1
 		bar.addSubviews([searchBar, homeButton, reloadButton, progressBarView])
 	}
@@ -204,7 +216,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	}
 	
 	func startProgressBar() {
-		progressBarView.backgroundColor = .blue
+		progressBarView.backgroundColor = darkOrange
 		progressBarView.setWidth(0)
 		UIView.animate(withDuration: 2) {
 			self.progressBarView.setWidth(self.view.frame.width - 100)

@@ -32,9 +32,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		window?.makeKeyAndVisible()
 		window?.rootViewController = navigationController
 		
-		navigationController.navigationBar.barStyle = .default
-		navigationController.navigationBar.tintColor = .red
-		navigationController.navigationBar.backgroundColor = .red
 		
 		
 		
