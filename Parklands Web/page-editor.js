@@ -1,42 +1,36 @@
+// Source: http://is.gd/mwZp7E
+var frag = document.createDocumentFragment();
 var node, next;
-
-//var element = document.getElementsByClassName("gsc-adBlock")[0];
-//console.log(element)
-//element.parentNode.removeChild(element);
-//document.getElementsByClassName("gsc-adBlock")[0].style.display = "none"
-
-console.log("faggot")
 
 // Remove ads
 window.onload = function () {
-	var element = document.getElementsByClassName("gsc-adBlock")[0];
-	element.parentNode.removeChild(element);
-	var element = document.getElementById("adBlock");
-	element.parentNode.removeChild(element);
-	console.log("hello")
-	document.getElementsByClassName("gsc-adBlock")[0].style.display = "none"
-}
-
-
-// Block other search providers
-hosts.map(host => {
-	if (window.location.hostname.indexOf(host) > -1) {
-	  document.body.innerHTML = "<h1>Blocked :(</h1>"
-	  return
+	try {
+		document.getElementsByClassName("gsc-adBlock")[0].style.display = "none"
+	} catch(err) {
+		console.log(err)
 	}
-})
 
-// Walk the dom looking for the given text in text nodes
-walk(document.body);
+	// Block other search providers
+	hosts.map(host => {
+		if (window.location.hostname.indexOf(host) > -1) {
+		  document.body.innerHTML = "<h1>Blocked :(</h1>"
+		  return
+		}
+	})
 
-// Insert the result into the current document via a fragment
-node = document.body.firstChild;
-while (node) {
-	next = node.nextSibling;
-	frag.appendChild(node);
-	node = next;
+	// Walk the dom looking for the given text in text nodes
+	walk(document.body);
+
+	// Insert the result into the current document via a fragment
+	node = document.body.firstChild;
+	while (node) {
+		next = node.nextSibling;
+		frag.appendChild(node);
+		node = next;
+	}
+	document.body.innerHTML = ""
+	document.body.appendChild(frag);
 }
-document.body.appendChild(frag);
 
 // Our walker function
 function walk(node) {
@@ -60,7 +54,8 @@ function walk(node) {
 }
 
 function handleText(textNode) {
+	console.log(textNode)
 	words.map(word => {
-		textNode.nodeValue = textNode.nodeValue.replace(new RegExp(`${word}`, "gi"), "!@#$%");
-	})
+			  textNode.nodeValue = textNode.nodeValue.replace(new RegExp(`${word}`, "gi"), "!@#$%");
+			  })
 }

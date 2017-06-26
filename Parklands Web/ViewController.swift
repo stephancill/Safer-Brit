@@ -27,9 +27,11 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	
 	var pageEditorSource: String!
 	
+	
 	override func loadView() {
 		super.loadView()
-		webView = WKWebView(frame: .zero, configuration: createWebViewConfiguration())
+		webView = WKWebView(frame: .zero)
+		addPageEditorScript()
 		webView.uiDelegate = self
 		webView.navigationDelegate = self
 		webView.allowsBackForwardNavigationGestures = true
@@ -85,33 +87,47 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		completeProgressBar()
 	}
 	
-	func createWebViewConfiguration() -> WKWebViewConfiguration {
-		let sourcePostLoad = getEditorScriptSource()
-		let scriptPostLoad = WKUserScript(source: sourcePostLoad, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-		
-		let contentController = WKUserContentController()
-		contentController.addUserScript(scriptPostLoad)
-		let configuration = WKWebViewConfiguration()
-		configuration.userContentController = contentController
-		return configuration
+	func addPageEditorScript() {
+		getEditorScriptSource { (result, error) in
+			if let source = result {
+				let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+				self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
+			}
+		}
 	}
 	
-	func getEditorScriptSource() -> String {
-		let blockedWords: [String] = ["flippen", "dangit", "dating"]
-		let blockedHosts: [String] = ["google", "bing", "yahoo", "msn"]
-		var source = ""
-		source += "var words = \(blockedWords)\n"
-		source += "var hosts = \(blockedHosts)\n"
-		do {
-			if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
-				source += try String.init(contentsOf: URL(fileURLWithPath: path))
-				print(source)
+	func getEditorScriptSource(completion: @escaping (_ result: String?, _ error: Error?)->()) {
+		print("hello")
+		
+		getBlockedWords { (result, error) in
+			if let blockedWords = result {
+				let blockedHosts: [String] = ["google", "bing", "yahoo", "msn"]
+				var source = ""
+				source += "var words = \(blockedWords)\n"
+				source += "var hosts = \(blockedHosts)\n"
+				do {
+					if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
+						source += try String.init(contentsOf: URL(fileURLWithPath: path))
+						completion(source, nil)
+					}
+				} catch {
+					print("Could not load words")
+				}
 			}
-		} catch {
-			print("Could not load words")
+			
 		}
 		
-		return source
+	}
+	
+	func getBlockedWords(completion: @escaping (_ result: [String]?, _ error: Error?)->()) {
+		let endpoint = URL(string: "https://cdn.rawgit.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en")
+
+		URLSession.shared.dataTask(with: endpoint!) { (data, response, error) in
+			var words = String.init(data: data!, encoding: .utf8)?.components(separatedBy: "\n")
+			let _ = words?.popLast()
+			completion(words, nil)
+		}.resume()
+		
 	}
 	
 	/* UI */
