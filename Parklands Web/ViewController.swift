@@ -90,8 +90,10 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	func addPageEditorScript() {
 		getEditorScriptSource { (result, error) in
 			if let source = result {
-				let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-				self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
+				DispatchQueue.main.async {
+					let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+					self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
+				}
 			}
 		}
 	}
