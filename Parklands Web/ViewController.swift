@@ -9,151 +9,78 @@
 import UIKit
 import WebKit
 
-class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITextFieldDelegate {
+class ViewController: UIViewController {
 
-	var webView: WKWebView!
-	
-	var searchBar: UIView!
-	var searchField: UITextField!
-	
-	var backButton: UIBarButtonItem!
-	var forwardButton: UIBarButtonItem!
-	var homeButton: UIButton!
-	var reloadButton: UIButton!
-	
-	var darkOrange: UIColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
-	
-	var progressBarView: UIView!
-	
-	var pageEditorSource: String!
-	
-	var blockedWords: [String]?
-	var blockedHosts: [String]?
-	
-	var requests: [()->()] = []
-	var requestsToComplete: Int = 0
+    var webView: WKWebView!
+    
+    var searchBar: UIView!
+    var searchField: UITextField!
+    
+    var backButton: UIBarButtonItem!
+    var forwardButton: UIBarButtonItem!
+    var homeButton: UIButton!
+    var reloadButton: UIButton!
+    
+    var darkOrange: UIColor = UIColor(red: 250/255, green: 192/255, blue: 46/255, alpha: 1)
+    
+    var progressBarView: UIView!
+    
+    var pageEditorSource: String!
+    
+    var blockedWords: [String]?
+    var blockedHosts: [String]?
+    
+    var requests: [()->()] = []
+    var requestsToComplete: Int = 0
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Add requests to queue
+        requests = [getBlockedWords, getBlockedHosts]
+        requestsToComplete = requests.count
+        
+        // Execute requests
+		let _ = requests.map { $0() }
 		
-		// Add requests to queue
-		requests = [getBlockedWords, getBlockedHosts]
-		requestsToComplete = requests.count
-		
-		// Execute requests
-		for request in requests {
-			request()
-		}
-		
-		// Starting page
-		let myURL = URL(string: "http://www.kiddle.co")
-		let myRequest = URLRequest(url: myURL!)
-		webView.load(myRequest)
-		
-		setupNavigationBar()
-	}
+        // Starting page
+        let myURL = URL(string: "http://www.kiddle.co")
+        let myRequest = URLRequest(url: myURL!)
+        webView.load(myRequest)
+        
+        setupNavigationBar()
+    }
 	
-	override func loadView() {
-		super.loadView()
-		
-		// Create WebView
-		webView = WKWebView(frame: .zero)
-		webView.uiDelegate = self
-		webView.navigationDelegate = self
-		webView.allowsBackForwardNavigationGestures = true
-		view = webView
-	}
+    override func loadView() {
+        super.loadView()
+        
+        // Create WebView
+        webView = WKWebView(frame: .zero)
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
+        webView.allowsBackForwardNavigationGestures = true
+        view = webView
+    }
 	
-	/* WebKit */
-	func goBack() {
-		self.webView.goBack()
-	}
-	
-	func goForward() {
-		self.webView.goForward()
-	}
-	
-	func goHome() {
-		self.searchField.text = ""
-		self.webView.goHome()
-	}
-	
-	func reload() {
-		self.webView.load(URLRequest.init(url: self.webView.url!))
-	}
-	
-	func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-		print("committed")
-		backButton.isEnabled = webView.canGoBack
-		forwardButton.isEnabled = webView.canGoForward
-		
-		startProgressBar()
-	}
-	
-	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-		print(error)
-		cancelProgressBar()
-		if (webView.canGoBack) {
-			webView.goBack()
-		}
-	}
-	
-	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-		print("finished")
-		completeProgressBar()
-	}
-	
-	func addPageEditorScript() {
-		getEditorScriptSource { (result, error) in
-			if let source = result {
-				DispatchQueue.main.async {
-					let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-					self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
-				}
-			}
-		}
-	}
-	
-	func getEditorScriptSource(completion: @escaping (_ result: String?, _ error: Error?)->()) {
-		print("hello")
-		
-		getBlockedWords { (result, error) in
-			if let blockedWords = result {
-				let blockedHosts: [String] = ["google", "bing", "yahoo", "msn"]
-				var source = ""
-				source += "var words = \(blockedWords)\n"
-				source += "var hosts = \(blockedHosts)\n"
-				do {
-					if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
-						source += try String.init(contentsOf: URL(fileURLWithPath: path))
-						completion(source, nil)
-					}
-				} catch {
-					print("Could not load words")
-				}
-			}
-			
-		}
-		
-	}
+	/* External resources */
 	
 	func getBlockedWords() {
 		/*
-		-	Fetch words to be censored
+		-    Fetch words to be censored
 		*/
 		let endpoint = URL(string: "https://cdn.rawgit.com/stephancill/Parklands-Web/38650c09/blocked-words.txt")
-
+		
 		URLSession.shared.dataTask(with: endpoint!) { (data, response, error) in
 			var words = String.init(data: data!, encoding: .utf8)?.components(separatedBy: "\n")
 			let _ = words?.popLast()
 			self.blockedWords = words
 			self.asyncRequestComplete(error: error)
-		}.resume()
+			}.resume()
 	}
 	
 	func getBlockedHosts() {
 		/*
-		-	Fetch blocked hosts
+		-    Fetch blocked hosts
 		*/
 		let endpoint = URL(string: "https://cdn.rawgit.com/stephancill/Parklands-Web/38650c09/blocked-hosts.txt")
 		
@@ -162,83 +89,89 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 			let _ = hosts?.popLast()
 			self.blockedHosts = hosts
 			self.asyncRequestComplete(error: error)
-		}.resume()
+			}.resume()
 	}
-    
 	
-    
-    func asyncRequestComplete(error: Error?) {
-		/* 
-		-	Handle complete request
-		*/
-        if error != nil {  return }
-        requestsToComplete -= 1
-		print("Requests remaining: ", requestsToComplete)
-        if requestsToComplete == 0 {
-            if let source = createPageEditorScript() {
-                addPageEditorScript(source: source)
-            }
-        }
-    }
-    
-    func createPageEditorScript() -> String? {
+	
+	
+	func asyncRequestComplete(error: Error?) {
 		/*
-		-	Populate the JS base script with external resources
+		-    Handle complete request
+		*/
+		if error != nil {  return }
+		requestsToComplete -= 1
+		print("Requests remaining: ", requestsToComplete)
+		if requestsToComplete == 0 {
+			if let source = createPageEditorScript() {
+				DispatchQueue.main.async {
+					// Add source to webView
+					let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+					self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
+				}
+			}
+		}
+	}
+	
+	func createPageEditorScript() -> String? {
+		/*
+		-    Populate the JS base script with external resources
 		*/
 		guard let hosts = blockedHosts, let words = blockedWords else {
 			return nil
 		}
 		
-        var source = ""
-        source += "var words = \(words)\n"
-        source += "var hosts = \(hosts)\n"
-        do {
-            if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
-                source += try String.init(contentsOf: URL(fileURLWithPath: path))
-				print(source)
+		var source = ""
+		source += "var words = \(words)\n"
+		source += "var hosts = \(hosts)\n"
+		do {
+			if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
+				source += try String.init(contentsOf: URL(fileURLWithPath: path))
 				return source
-            } else {
-                throw ScriptCreationError.creationFailure
-            }
-        } catch {
-            print("Could not load words")
-        }
-        return nil
+			} else {
+				throw ScriptCreationError.creationFailure
+			}
+		} catch {
+			print("Could not load words")
+		}
+		return nil
+	}
+    
+    /* UI */
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        self.tearDownNavigationBar()
+        self.setupNavigationBar()
     }
 	
-	func addPageEditorScript(source: String) {
-		/*
-		-	Add source to webView
-		*/
-		let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-		self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
-	}
-	
-	/* UI */
-	
-	func textFieldDidBeginEditing(_ textField: UITextField) {
-		textField.selectAll(self)
-	}
-	
-	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-		let text = textField.text!
-		let escapedAddress = text.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
-		let queryString = "http://www.kiddle.co/s.php?q=\(escapedAddress!)"
-		
-		webView.load(queryString)
-		textField.endEditing(true)
-		return true
-	}
-	
-	func textFieldDidEndEditing(_ textField: UITextField) {
-		textField.textAlignment = .center
-	}
-	
-	override func viewWillLayoutSubviews() {
-		super.viewWillLayoutSubviews()
-		self.tearDownNavigationBar()
-		self.setupNavigationBar()
-	}
+	/* Progress Bar */
+    func startProgressBar() {
+        progressBarView.backgroundColor = darkOrange
+        progressBarView.setWidth(0)
+        UIView.animate(withDuration: 2) {
+            self.progressBarView.setWidth(self.view.frame.width - 100)
+        }
+    }
+    
+    func completeProgressBar() {
+        UIView.animate(withDuration: 0.5) {
+            self.progressBarView.setWidth(self.view.frame.width)
+        }
+        
+        UIView.animate(withDuration: 0.5, animations: {
+            self.progressBarView.backgroundColor = .clear
+        }) { (bool) in
+            self.progressBarView.setWidth(0)
+        }
+    }
+    
+    func cancelProgressBar() {
+        UIView.animate(withDuration: 0.5, animations: {
+            self.progressBarView.backgroundColor = .clear
+        }) { (bool) in
+            self.progressBarView.setWidth(0)
+        }
+    }
 	
 	func setupNavigationBar() {
 		let bar = (self.navigationController?.navigationBar)!
@@ -255,7 +188,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		searchBar.layer.shadowOffset = CGSize(width: 1, height: 1)
 		searchBar.layer.shadowRadius = 2
 		searchBar.layer.shadowColor = UIColor.gray.cgColor
-		searchBar.layer.shadowOpacity = 0.3
+		searchBar.layer.shadowOpacity = 0.0
 		
 		if self.view.frame.width < 600 {
 			searchBar.setWidth(self.view.frame.width * 60/100)
@@ -266,6 +199,7 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		searchField.frame.origin = CGPoint(x: searchBar.frame.width / 2 - searchField.frame.width / 2, y: searchBar.frame.height / 2 - searchField.frame.height / 2)
 		searchField.autocorrectionType = .no
 		searchField.autocapitalizationType = .none
+		searchField.keyboardType = .webSearch
 		searchField.placeholder = "Search..."
 		searchField.textAlignment = .center
 		searchField.delegate = self
@@ -298,8 +232,9 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		bar.barStyle = .default
 		bar.tintColor = darkOrange
 		bar.backgroundColor = darkOrange
-
-		bar.addSubviews([searchBar, homeButton, reloadButton, progressBarView])
+		
+		// Add subviews
+		let _ = [searchBar, homeButton, reloadButton, progressBarView].map { bar.addSubview($0) }
 	}
 	
 	func tearDownNavigationBar() {
@@ -307,70 +242,81 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 			view?.removeFromSuperview()
 		}
 	}
-	
-	func startProgressBar() {
-		progressBarView.backgroundColor = darkOrange
-		progressBarView.setWidth(0)
-		UIView.animate(withDuration: 2) {
-			self.progressBarView.setWidth(self.view.frame.width - 100)
-		}
-	}
-	
-	func completeProgressBar() {
-		UIView.animate(withDuration: 0.5) {
-			self.progressBarView.setWidth(self.view.frame.width)
-		}
-		
-		UIView.animate(withDuration: 0.5, animations: {
-			self.progressBarView.backgroundColor = .clear
-		}) { (bool) in
-			self.progressBarView.setWidth(0)
-		}
-	}
-	
-	func cancelProgressBar() {
-		UIView.animate(withDuration: 0.5, animations: {
-			self.progressBarView.backgroundColor = .clear
-		}) { (bool) in
-			self.progressBarView.setWidth(0)
-		}
-	}
-
 }
 
-enum ScriptCreationError: Error {
-    case creationFailure
-}
-
-extension UINavigationBar {
-	func addSubviews(_ views: [UIView]) {
-		for view in views {
-			self.addSubview(view)
-		}
+extension ViewController: WKUIDelegate, WKNavigationDelegate, WebViewTouchDelegate {
+	/* WebKit */
+	func goBack() {
+		self.webView.goBack()
 	}
-}
-
-extension WKWebView {
-	func load(_ link: String) {
-		let myURL = URL(string: link)
-		let myRequest = URLRequest(url: myURL!)
-		self.load(myRequest)
+	
+	func goForward() {
+		self.webView.goForward()
 	}
 	
 	func goHome() {
-		let currentPage = self.url?.absoluteString
-		if currentPage != "http://m.kiddle.co/" {
-			load("http://m.kiddle.co/")
+		self.searchField.text = ""
+		self.webView.goHome()
+	}
+	
+	func reload() {
+		self.webView.load(URLRequest.init(url: self.webView.url!))
+	}
+	
+	func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+		print("committed")
+		backButton.isEnabled = webView.canGoBack
+		forwardButton.isEnabled = webView.canGoForward
+		webView.isUserInteractionEnabled = false
+		
+		startProgressBar()
+	}
+	
+	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+		print(error)
+		cancelProgressBar()
+		if (webView.canGoBack) {
+			webView.goBack()
 		}
 	}
+	
+	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+		print("finished")
+		webView.isUserInteractionEnabled = true
+		completeProgressBar()
+	}
+	
+	func touchesBegan(webView: WKWebView) {
+		self.searchField.endEditing(true)
+	}
+	
 }
 
-extension UIView {
-	func setWidth(_ width: CGFloat) {
-		self.frame = CGRect(origin: self.frame.origin, size: CGSize.init(width: width, height: self.frame.height))
+extension ViewController: UITextFieldDelegate {
+	func textFieldDidBeginEditing(_ textField: UITextField) {
+		textField.selectAll(self)
+		searchBar.layer.shadowOpacity = 0.3
+	}
+	
+	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+		let text = textField.text!
+		let escapedAddress = text.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
+		let queryString = "http://www.kiddle.co/s.php?q=\(escapedAddress!)"
+		
+		webView.load(queryString)
+		textField.endEditing(true)
+		return true
+	}
+	
+	func textFieldDidEndEditing(_ textField: UITextField) {
+		textField.textAlignment = .center
+	}
+	
+	func textFieldDidEndEditing(_ textField: UITextField, reason: UITextFieldDidEndEditingReason) {
+		searchBar.layer.shadowOpacity = 0
 	}
 }
 
-
-
-
+enum ScriptCreationError: Error {
+	case creationFailure
+}
