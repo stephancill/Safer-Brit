@@ -27,25 +27,41 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 	
 	var pageEditorSource: String!
 	
+	var blockedWords: [String]?
+	var blockedHosts: [String]?
 	
-	override func loadView() {
-		super.loadView()
-		webView = WKWebView(frame: .zero)
-		addPageEditorScript()
-		webView.uiDelegate = self
-		webView.navigationDelegate = self
-		webView.allowsBackForwardNavigationGestures = true
-		view = webView
-	}
+	var requests: [()->()] = []
+	var requestsToComplete: Int = 0
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
+		// Add requests to queue
+		requests = [getBlockedWords, getBlockedHosts]
+		requestsToComplete = requests.count
+		
+		// Execute requests
+		for request in requests {
+			request()
+		}
+		
+		// Starting page
 		let myURL = URL(string: "http://www.kiddle.co")
 		let myRequest = URLRequest(url: myURL!)
 		webView.load(myRequest)
 		
 		setupNavigationBar()
+	}
+	
+	override func loadView() {
+		super.loadView()
+		
+		// Create WebView
+		webView = WKWebView(frame: .zero)
+		webView.uiDelegate = self
+		webView.navigationDelegate = self
+		webView.allowsBackForwardNavigationGestures = true
+		view = webView
 	}
 	
 	/* WebKit */
@@ -121,15 +137,81 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		
 	}
 	
-	func getBlockedWords(completion: @escaping (_ result: [String]?, _ error: Error?)->()) {
-		let endpoint = URL(string: "https://cdn.rawgit.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en")
+	func getBlockedWords() {
+		/*
+		-	Fetch words to be censored
+		*/
+		let endpoint = URL(string: "https://cdn.rawgit.com/stephancill/Parklands-Web/38650c09/blocked-words.txt")
 
 		URLSession.shared.dataTask(with: endpoint!) { (data, response, error) in
 			var words = String.init(data: data!, encoding: .utf8)?.components(separatedBy: "\n")
 			let _ = words?.popLast()
-			completion(words, nil)
+			self.blockedWords = words
+			self.asyncRequestComplete(error: error)
 		}.resume()
+	}
+	
+	func getBlockedHosts() {
+		/*
+		-	Fetch blocked hosts
+		*/
+		let endpoint = URL(string: "https://cdn.rawgit.com/stephancill/Parklands-Web/38650c09/blocked-hosts.txt")
 		
+		URLSession.shared.dataTask(with: endpoint!) { (data, response, error) in
+			var hosts = String.init(data: data!, encoding: .utf8)?.components(separatedBy: "\n")
+			let _ = hosts?.popLast()
+			self.blockedHosts = hosts
+			self.asyncRequestComplete(error: error)
+		}.resume()
+	}
+    
+	
+    
+    func asyncRequestComplete(error: Error?) {
+		/* 
+		-	Handle complete request
+		*/
+        if error != nil {  return }
+        requestsToComplete -= 1
+		print("Requests remaining: ", requestsToComplete)
+        if requestsToComplete == 0 {
+            if let source = createPageEditorScript() {
+                addPageEditorScript(source: source)
+            }
+        }
+    }
+    
+    func createPageEditorScript() -> String? {
+		/*
+		-	Populate the JS base script with external resources
+		*/
+		guard let hosts = blockedHosts, let words = blockedWords else {
+			return nil
+		}
+		
+        var source = ""
+        source += "var words = \(words)\n"
+        source += "var hosts = \(hosts)\n"
+        do {
+            if let path = Bundle.main.path(forResource: "page-editor", ofType:"js") {
+                source += try String.init(contentsOf: URL(fileURLWithPath: path))
+				print(source)
+				return source
+            } else {
+                throw ScriptCreationError.creationFailure
+            }
+        } catch {
+            print("Could not load words")
+        }
+        return nil
+    }
+	
+	func addPageEditorScript(source: String) {
+		/*
+		-	Add source to webView
+		*/
+		let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+		self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
 	}
 	
 	/* UI */
@@ -254,6 +336,10 @@ class ViewController: UIViewController, WKUIDelegate, WKNavigationDelegate, UITe
 		}
 	}
 
+}
+
+enum ScriptCreationError: Error {
+    case creationFailure
 }
 
 extension UINavigationBar {
