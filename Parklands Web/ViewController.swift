@@ -53,7 +53,7 @@ class ViewController: UIViewController {
 	
     override func loadView() {
         super.loadView()
-        
+		
         // Create WebView
         webView = WKWebView(frame: .zero)
         webView.uiDelegate = self
@@ -105,8 +105,10 @@ class ViewController: UIViewController {
 			if let source = createPageEditorScript() {
 				DispatchQueue.main.async {
 					// Add source to webView
-					let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+					let scriptPostLoad = WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true)
 					self.webView.configuration.userContentController.addUserScript(scriptPostLoad)
+					self.webView.configuration.userContentController.add(self, name: "enableUserInteraction")
+					self.webView.configuration.userContentController.add(self, name: "disableUserInteraction")
 				}
 			}
 		}
@@ -247,6 +249,7 @@ class ViewController: UIViewController {
 extension ViewController: WKUIDelegate, WKNavigationDelegate, WebViewTouchDelegate {
 	/* WebKit */
 	func goBack() {
+		webView.isUserInteractionEnabled = true
 		self.webView.goBack()
 	}
 	
@@ -267,7 +270,6 @@ extension ViewController: WKUIDelegate, WKNavigationDelegate, WebViewTouchDelega
 		print("committed")
 		backButton.isEnabled = webView.canGoBack
 		forwardButton.isEnabled = webView.canGoForward
-		webView.isUserInteractionEnabled = false
 		
 		startProgressBar()
 	}
@@ -282,14 +284,27 @@ extension ViewController: WKUIDelegate, WKNavigationDelegate, WebViewTouchDelega
 	
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		print("finished")
-		webView.isUserInteractionEnabled = true
+		
 		completeProgressBar()
 	}
 	
 	func touchesBegan(webView: WKWebView) {
 		self.searchField.endEditing(true)
 	}
-	
+}
+
+extension ViewController: WKScriptMessageHandler {
+	func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+		print("hello")
+		switch message.name {
+		case "enableUserInteraction":
+			webView.isUserInteractionEnabled = true
+		case "disableUserInteraction":
+			webView.isUserInteractionEnabled = false
+		default:
+			return
+		}
+	}
 }
 
 extension ViewController: UITextFieldDelegate {

@@ -2,6 +2,12 @@
 var frag = document.createDocumentFragment();
 var node, next;
 
+try {
+	webkit.messageHandlers.disableUserInteraction.postMessage("Send from JavaScript");
+} catch(err) {
+	console.log('error');
+}
+
 // Remove ads
 window.onload = function () {
 	try {
@@ -30,6 +36,12 @@ window.onload = function () {
 	}
 	document.body.innerHTML = ""
 	document.body.appendChild(frag);
+	
+	try {
+		webkit.messageHandlers.enableUserInteraction.postMessage("Send from JavaScript");
+	} catch(err) {
+		console.log('error');
+	}
 }
 
 // Our walker function
