@@ -227,7 +227,7 @@ class ViewController: UIViewController {
 		reloadButton.setImage(UIImage.init(named: "icn-reload"), for: .normal)
 		reloadButton.addTarget(self, action: #selector(reload), for: .touchUpInside)
 		
-		progressBarView = UIView(frame: CGRect.init(x: 0, y: searchBar.frame.maxY + 6, width: bar.frame.width, height: 2))
+		progressBarView = UIView(frame: CGRect.init(x: 0, y: searchBar.frame.maxY + 6, width: bar.frame.width, height: 3))
 		progressBarView.backgroundColor = .blue
 		progressBarView.setWidth(0)
 		
@@ -318,6 +318,7 @@ extension ViewController: UITextFieldDelegate {
 		let escapedAddress = text.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
 		let queryString = "http://www.kiddle.co/s.php?q=\(escapedAddress!)"
 		
+		startProgressBar()
 		webView.load(queryString)
 		textField.endEditing(true)
 		return true
