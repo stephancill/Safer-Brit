@@ -3,7 +3,9 @@ var frag = document.createDocumentFragment();
 var node, next;
 
 try {
-	webkit.messageHandlers.disableUserInteraction.postMessage("Send from JavaScript");
+	if (window.location.href.indexOf("kiddle") > -1) {
+		webkit.messageHandlers.disableUserInteraction.postMessage("Send from JavaScript");
+	}
 } catch(err) {
 	console.log('error');
 }
