@@ -1,11 +1,11 @@
-# Parklands Web
-Xcode project for the Parklands Web safe browser. Runs on iPad.
+# Safer Brit
+Xcode project for the Safer Brit safe browser. Runs on iPad.
 
 ## Screenshots
-[![Parklands Web](/screenshots/screenshot1.png)](#)
+[![Safer Brit](/screenshots/screenshot2.png)](#)
 
 ## Features
-* Ad blocking
+* Switching between search levels (e.g. Foundation, Intermediate, Advanced)
 * Inappropriate word censoring (Source: [github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words](https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/blob/master/en))
 * Domain blocking
 
